@@ -1,14 +1,13 @@
 import { useState } from 'react'
 
 const initialTasks = [
-  // To Do
-  { id: 1, title: 'Day 1 - Claude vs ChatGPT', status: 'todo', assignee: 'Karthik', type: 'record', day: 1 },
-  { id: 2, title: 'Day 2 - GPT-5 Leak', status: 'todo', assignee: 'Karthik', type: 'record', day: 2 },
-  { id: 3, title: 'Day 3 - Ideogram Tutorial', status: 'todo', assignee: 'Karthik', type: 'record', day: 3 },
-  { id: 4, title: 'Day 4 - AI Comparison', status: 'todo', assignee: 'Karthik', type: 'record', day: 4 },
-  { id: 5, title: 'Day 5 - Hot Take', status: 'todo', assignee: 'Karthik', type: 'record', day: 5 },
-  { id: 6, title: 'Day 6 - My AI Stack', status: 'todo', assignee: 'Karthik', type: 'record', day: 6 },
-  { id: 7, title: 'Day 7 - 10 AI Tools Carousel', status: 'todo', assignee: 'Karthik', type: 'design', day: 7 },
+  { id: 1, title: 'Day 1 - Claude vs ChatGPT', status: 'todo', assignee: 'Karthik', type: 'record', day: 1, driveUrl: '', notes: '' },
+  { id: 2, title: 'Day 2 - GPT-5 Leak', status: 'todo', assignee: 'Karthik', type: 'record', day: 2, driveUrl: '', notes: '' },
+  { id: 3, title: 'Day 3 - Ideogram Tutorial', status: 'todo', assignee: 'Karthik', type: 'record', day: 3, driveUrl: '', notes: '' },
+  { id: 4, title: 'Day 4 - AI Comparison', status: 'todo', assignee: 'Karthik', type: 'record', day: 4, driveUrl: '', notes: '' },
+  { id: 5, title: 'Day 5 - Hot Take', status: 'todo', assignee: 'Karthik', type: 'record', day: 5, driveUrl: '', notes: '' },
+  { id: 6, title: 'Day 6 - My AI Stack', status: 'todo', assignee: 'Karthik', type: 'record', day: 6, driveUrl: '', notes: '' },
+  { id: 7, title: 'Day 7 - 10 AI Tools Carousel', status: 'todo', assignee: 'Karthik', type: 'design', day: 7, driveUrl: '', notes: '' },
 ]
 
 const columns = [
@@ -22,11 +21,18 @@ const columns = [
 export default function Workflow() {
   const [tasks, setTasks] = useState(initialTasks)
   const [showAddTask, setShowAddTask] = useState(false)
+  const [editingTask, setEditingTask] = useState(null)
   const [newTask, setNewTask] = useState({ title: '', assignee: 'Karthik', type: 'record' })
   
   const moveTask = (taskId, newStatus) => {
     setTasks(tasks.map(t => 
       t.id === taskId ? { ...t, status: newStatus } : t
+    ))
+  }
+  
+  const updateTask = (taskId, field, value) => {
+    setTasks(tasks.map(t => 
+      t.id === taskId ? { ...t, [field]: value } : t
     ))
   }
   
@@ -36,7 +42,9 @@ export default function Workflow() {
       id: Date.now(),
       ...newTask,
       status: 'todo',
-      day: tasks.length + 1
+      day: tasks.length + 1,
+      driveUrl: '',
+      notes: ''
     }])
     setNewTask({ title: '', assignee: 'Karthik', type: 'record' })
     setShowAddTask(false)
@@ -61,11 +69,11 @@ export default function Workflow() {
           </div>
           <div>
             <strong style={{ color: '#3b82f6' }}>2. Recording</strong>
-            <p style={{ color: 'var(--text-secondary)', marginTop: '5px' }}>Karthik records raw footage</p>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '5px' }}>Karthik records + adds Drive URL</p>
           </div>
           <div>
             <strong style={{ color: '#8b5cf6' }}>3. Editing</strong>
-            <p style={{ color: 'var(--text-secondary)', marginTop: '5px' }}>Editor adds cuts, captions, effects</p>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '5px' }}>Editor downloads from Drive, edits</p>
           </div>
           <div>
             <strong style={{ color: '#ec4899' }}>4. Review</strong>
@@ -99,19 +107,61 @@ export default function Workflow() {
                     </span>
                   </div>
                   
-                  {/* Move buttons */}
-                  <div style={{ marginTop: '10px', display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                    {column.id !== 'todo' && (
-                      <button 
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => {
-                          const idx = columns.findIndex(c => c.id === column.id)
-                          if (idx > 0) moveTask(task.id, columns[idx - 1].id)
+                  {/* Drive URL Section */}
+                  <div style={{ marginTop: '10px' }}>
+                    {task.driveUrl ? (
+                      <a 
+                        href={task.driveUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          padding: '6px 10px',
+                          background: 'rgba(66, 133, 244, 0.2)',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          color: '#4285f4'
                         }}
                       >
-                        ← Back
-                      </button>
+                        📁 Open in Drive
+                      </a>
+                    ) : (
+                      <div style={{
+                        padding: '6px 10px',
+                        background: 'var(--bg-secondary)',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        color: 'var(--text-secondary)'
+                      }}>
+                        No Drive link yet
+                      </div>
                     )}
+                  </div>
+                  
+                  {/* Notes preview */}
+                  {task.notes && (
+                    <div style={{
+                      marginTop: '8px',
+                      padding: '6px 10px',
+                      background: 'var(--bg-secondary)',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-secondary)'
+                    }}>
+                      📝 {task.notes.substring(0, 50)}{task.notes.length > 50 ? '...' : ''}
+                    </div>
+                  )}
+                  
+                  {/* Actions */}
+                  <div style={{ marginTop: '10px', display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setEditingTask(task)}
+                    >
+                      ✏️ Edit
+                    </button>
                     {column.id !== 'done' && (
                       <button 
                         className="btn btn-primary btn-sm"
@@ -184,6 +234,95 @@ export default function Workflow() {
           </div>
         </div>
       </div>
+      
+      {/* Edit Task Modal */}
+      {editingTask && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="card" style={{ width: '500px', maxHeight: '90vh', overflow: 'auto' }}>
+            <div className="card-title" style={{ marginBottom: '20px' }}>
+              ✏️ Edit Task: {editingTask.title}
+            </div>
+            
+            <div className="form-group">
+              <label>📁 Google Drive URL (Raw Recording)</label>
+              <input 
+                type="url"
+                value={editingTask.driveUrl}
+                onChange={(e) => {
+                  setEditingTask({...editingTask, driveUrl: e.target.value})
+                  updateTask(editingTask.id, 'driveUrl', e.target.value)
+                }}
+                placeholder="https://drive.google.com/file/d/..."
+              />
+              <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '5px' }}>
+                Upload your raw recording to Drive and paste the share link here
+              </small>
+            </div>
+            
+            <div className="form-group">
+              <label>👤 Assignee</label>
+              <select 
+                value={editingTask.assignee}
+                onChange={(e) => {
+                  setEditingTask({...editingTask, assignee: e.target.value})
+                  updateTask(editingTask.id, 'assignee', e.target.value)
+                }}
+              >
+                <option value="Karthik">Karthik</option>
+                <option value="Editor">Editor</option>
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label>📝 Notes for Editor</label>
+              <textarea 
+                rows="3"
+                value={editingTask.notes}
+                onChange={(e) => {
+                  setEditingTask({...editingTask, notes: e.target.value})
+                  updateTask(editingTask.id, 'notes', e.target.value)
+                }}
+                placeholder="Any specific instructions, timestamps to cut, effects to add..."
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>📊 Status</label>
+              <select 
+                value={editingTask.status}
+                onChange={(e) => {
+                  setEditingTask({...editingTask, status: e.target.value})
+                  updateTask(editingTask.id, 'status', e.target.value)
+                }}
+              >
+                {columns.map(col => (
+                  <option key={col.id} value={col.id}>{col.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button className="btn btn-primary" onClick={() => setEditingTask(null)}>
+                Save & Close
+              </button>
+              <button className="btn btn-secondary" onClick={() => setEditingTask(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Add Task Modal */}
       {showAddTask && (
